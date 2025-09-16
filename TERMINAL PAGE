@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Eternal Tribe Terminal</title>
+</head>
+<body>
+  <h2>Eternal Tribe // Terminal</h2>
+  <input id="codeInput" placeholder="FLAME-001 / WARRIOR-001">
+  <button id="unlockBtn">Unlock</button>
+  <div id="unlockMsg"></div>
+
+  <script>
+  const API = "https://theeternaltribe.theeternaltribe.repl.co/api/checkcode";
+
+  async function unlock() {
+    const el = document.getElementById("codeInput");
+    const msg = document.getElementById("unlockMsg");
+    const code = (el.value || "").trim();
+    if (!code) { msg.textContent = "⚠️ Enter a code."; return; }
+    msg.textContent = "Checking…";
+
+    try {
+      const r = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+      const data = await r.json();
+
+      if (data.ok) {
+        msg.innerHTML = `✅ Valid code for <b>${data.tier}</b>. 
+        Next: use <code>!verify ${code}</code> in Discord.`;
+      } else if (data.error === "used_code") {
+        msg.textContent = "⚠️ That code was already used.";
+      } else {
+        msg.textContent = "❌ Invalid or expired code.";
+      }
+    } catch (e) {
+      msg.textContent = "⚠️ Network error. Try again.";
+    }
+  }
+
+  document.getElementById("unlockBtn").addEventListener("click", unlock);
+  </script>
+</body>
+</html>
